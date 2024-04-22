@@ -21,7 +21,7 @@
 
 struct mynode {
   	struct rb_node node;
-  	char *string;
+  	char *string; // string 成员则包含了一个用于比较和排序树中节点的键值
 };
 
 struct rb_root mytree = RB_ROOT;
@@ -83,57 +83,31 @@ void my_free(struct mynode *node)
 	}
 }
 
-#define NUM_NODES 32
+#define NUM_NODES 50000000
 
 int main()
 {
-
-	struct mynode *mn[NUM_NODES];
+//    struct mynode *mn[NUM_NODES];
+    struct mynode **mn = malloc(NUM_NODES * sizeof(struct mynode*));
 
 	/* *insert */
 	int i = 0;
-	printf("insert node from 1 to NUM_NODES(32): \n");
+	printf("insert node from 1 to NUM_NODES(50M): \n");
+    long long totalMemoryUsed = 0; // 用于跟踪使用的总内存
 	for (; i < NUM_NODES; i++) {
 		mn[i] = (struct mynode *)malloc(sizeof(struct mynode));
 		mn[i]->string = (char *)malloc(sizeof(char) * 4);
-		sprintf(mn[i]->string, "%d", i);
+//		sprintf(mn[i]->string, "%d", i);
 		my_insert(&mytree, mn[i]);
-	}
-	
-	/* *search */
-	struct rb_node *node;
-	printf("search all nodes: \n");
-	for (node = rb_first(&mytree); node; node = rb_next(node))
-		printf("key = %s\n", rb_entry(node, struct mynode, node)->string);
+        totalMemoryUsed += sizeof(struct mynode) + sizeof(char) * 4; // 更新内存使用统计
+    }
+    printf("Total memory used: %f MB\n", (double)totalMemoryUsed / 1024 / 1024);
 
-	/* *delete */
-	printf("delete node 20: \n");
-	struct mynode *data = my_search(&mytree, "20");
-	if (data) {
-		rb_erase(&data->node, &mytree);
-		my_free(data);
-	}
-
-	/* *delete again*/
-	printf("delete node 10: \n");
-	data = my_search(&mytree, "10");
-	if (data) {
-		rb_erase(&data->node, &mytree);
-		my_free(data);
-	}
-
-	/* *delete once again*/
-	printf("delete node 15: \n");
-	data = my_search(&mytree, "15");
-	if (data) {
-		rb_erase(&data->node, &mytree);
-		my_free(data);
-	}
-
-	/* *search again*/
-	printf("search again:\n");
-	for (node = rb_first(&mytree); node; node = rb_next(node))
-		printf("key = %s\n", rb_entry(node, struct mynode, node)->string);
+    // 在程序结束前释放所有节点
+    for (i = 0; i < NUM_NODES; i++) {
+        my_free(mn[i]);
+    }
+    free(mn);
 	return 0;
 }
 
