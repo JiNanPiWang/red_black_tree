@@ -6,7 +6,7 @@ rbtree-tst:rbtree-tst.o rbtree.o
 
 rbtree.o:rbtree.h rbtree.c
 
-rbtree-tst.o:rbtree-tst.c
+rbtree-tst.o:rbtree-tst.cpp
 
 .PHONY:clean
 
